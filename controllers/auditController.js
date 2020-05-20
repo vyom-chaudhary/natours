@@ -1,5 +1,3 @@
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
 const Audit = require('../models/auditModel');
 
 exports.createLoginAudit = async (req, res, next) => {
