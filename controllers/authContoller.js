@@ -7,6 +7,7 @@ const AppError = require('./../utils/appError');
 const Email = require('./../utils/email');
 
 const User = require('./../models/userModel');
+const Audit = require('./../models/auditModel');
 
 const signToken = id => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -57,11 +58,31 @@ exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
   // 1) Check if email and password exist
-  if (!email || !password) {
+  if (!email) {
     return next(new AppError('Please provide email and password!', 400));
   }
   // 2) Check if user exists && password is correct
   const user = await User.findOne({ email }).select('+password');
+
+  const tokenaudit = req.useragent.browser + user.id + req.useragent.os;
+
+  // eslint-disable-next-line camelcase
+  const hashed_Token = crypto
+    .createHash('sha256')
+    .update(tokenaudit)
+    .digest('hex');
+
+  const auditrow = await Audit.find({
+    device_token: hashed_Token,
+    user: user.id
+  });
+  console.log(auditrow);
+  console.log(auditrow.user, user.id);
+
+  if (auditrow && auditrow.user === user.id) {
+    //next();
+    return createSendToken(user, 200, res);
+  }
 
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(new AppError('Incorrect email or password', 401));
@@ -69,6 +90,9 @@ exports.login = catchAsync(async (req, res, next) => {
 
   // 3) If everything ok, send token to client
   createSendToken(user, 200, res);
+
+  req.user = user;
+  next();
 });
 
 exports.logout = (req, res) => {

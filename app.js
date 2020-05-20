@@ -7,6 +7,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
+const useragent = require('express-useragent');
 
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -65,6 +66,10 @@ app.use(
     ]
   })
 );
+
+///device check
+
+app.use(useragent.express());
 
 ///test middleware
 app.use((req, res, next) => {

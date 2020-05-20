@@ -5,6 +5,7 @@ const express = require('express');
 //const multer = require('multer');
 const userController = require('./../controllers/userController');
 const authController = require('./../controllers/authContoller');
+const auditController = require('../controllers/auditController');
 
 // const storage = multer.diskStorage({
 //   filename: function(req, file, cb) {
@@ -30,7 +31,9 @@ const authController = require('./../controllers/authContoller');
 const router = express.Router();
 
 router.route('/signup').post(authController.signup);
-router.route('/login').post(authController.login);
+router
+  .route('/login')
+  .post(authController.login, auditController.createLoginAudit);
 router.route('/logout').get(authController.logout);
 
 router.route('/forgetpassword').post(authController.forgetpassword);
