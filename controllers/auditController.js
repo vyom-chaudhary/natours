@@ -16,6 +16,6 @@ exports.createLoginAudit = async (req, res, next) => {
     status: 'active'
   });
 
-  const token = audit.createLoginToken();
+  audit.createLoginToken();
   await audit.save();
 };
